@@ -1,0 +1,137 @@
+﻿@model IEnumerable<TraineeTaskContactManager.Models.PersonalInfo>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+
+<p>
+    <input type="text" id="filterInput" placeholder="Filter data..." onkeyup="filterTable()" />
+</p>
+
+<table id="personalInfoTable" class="table">
+    <thead>
+        <tr>
+            <th onclick="sortTable(0)" data-sort-order="none">Name</th>
+            <th onclick="sortTable(1)" data-sort-order="none">Date of Birth</th>
+            <th onclick="sortTable(2)" data-sort-order="none">Married</th>
+            <th onclick="sortTable(3)" data-sort-order="none">Phone</th>
+            <th onclick="sortTable(4)" data-sort-order="none">Salary</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                <td>@Html.DisplayFor(modelItem => item.DateOfBirth)</td>
+                <td>@(item.Married ? "Yes" : "No")</td>
+                <td>@Html.DisplayFor(modelItem => item.Phone)</td>
+                <td>@Html.DisplayFor(modelItem => item.Salary)</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+<form asp-action="UploadCsv" asp-controller="PersonalInfoes" enctype="multipart/form-data" method="post">
+    <div class="form-group">
+        <label for="file">Upload CSV File</label>
+        <input type="file" id="file" name="file" class="form-control" aria-describedby="fileHelp" required />
+        <small id="fileHelp" class="form-text text-muted">Please upload a valid CSV file (e.g., with columns Name, Date of Birth, Married, Phone, Salary).</small>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3">Upload</button>
+</form>
+
+<style>
+    th {
+        cursor: pointer;
+        position: relative;
+    }
+    th:after {
+        content: ''; 
+    }
+    th[data-sort-order="asc"]:after {
+        content: ' ▲';
+    }
+    th[data-sort-order="desc"]:after {
+        content: ' ▼';
+    }
+</style>
+
+<script>
+    function filterTable() {
+        const input = document.getElementById("filterInput").value.toLowerCase();
+        const table = document.getElementById("personalInfoTable");
+        const rows = table.getElementsByTagName("tr");
+
+        for (let i = 1; i < rows.length; i++) { 
+            const cells = rows[i].getElementsByTagName("td");
+            let match = false;
+
+            for (let j = 0; j < cells.length - 1; j++) {
+                let cellText = cells[j].innerText.trim().toLowerCase();
+
+                if (cellText === "true" || cellText === "false") {
+                    if ("true".includes(input) && cellText === "true") {
+                        match = true;
+                        break;
+                    } else if ("false".includes(input) && cellText === "false") {
+                        match = true;
+                        break;
+                    }
+                } else if (cellText.includes(input)) {
+                    match = true;
+                    break;
+                }
+            }
+
+            rows[i].style.display = match ? "" : "none";
+        }
+    }
+
+    function sortTable(columnIndex) {
+        const table = document.getElementById("personalInfoTable");
+        const rows = Array.from(table.rows).slice(1); 
+        let ascending = true;
+
+        if (table.getAttribute("data-sort-column") == columnIndex &&
+            table.getAttribute("data-sort-order") == "asc") {
+            ascending = false;
+        }
+
+        rows.sort((a, b) => {
+            const aText = a.cells[columnIndex].innerText.trim().toLowerCase();
+            const bText = b.cells[columnIndex].innerText.trim().toLowerCase();
+
+            if (!isNaN(aText) && !isNaN(bText)) {
+                return ascending ? aText - bText : bText - aText;
+            }
+
+            return ascending ? aText.localeCompare(bText) : bText.localeCompare(aText);
+        });
+
+        const tbody = table.querySelector("tbody");
+        rows.forEach(row => tbody.appendChild(row));
+
+        table.setAttribute("data-sort-column", columnIndex);
+        table.setAttribute("data-sort-order", ascending ? "asc" : "desc");
+
+        const headers = table.getElementsByTagName("th");
+        for (let i = 0; i < headers.length; i++) {
+            headers[i].setAttribute("data-sort-order", "none");
+        }
+        headers[columnIndex].setAttribute("data-sort-order", ascending ? "asc" : "desc");
+    }
+</script>
