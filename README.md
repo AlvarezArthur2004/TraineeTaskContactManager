@@ -31,3 +31,6 @@ Notes:
 You are not expected to fully complete the task. Feel free to work on it for up to 8 hours or less.
 Demonstrate the best approaches to showcase your skills.
 Once completed, commit your code to your Git repository and share the repository link with us.
+
+Main Menu Example:
+![image](https://github.com/user-attachments/assets/cf124887-d72a-4936-b7f1-4aae357c760a)
